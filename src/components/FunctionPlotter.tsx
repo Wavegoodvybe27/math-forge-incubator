@@ -114,7 +114,9 @@ export function FunctionPlotter() {
           const x = xRange.min + i * step;
           try {
             const y = compiledFunction.evaluate({ x });
-            if (math.isNaN(y) || !math.isFinite(y)) continue;
+            
+            // Fix for the isFinite error - use Number.isFinite instead of math.isFinite
+            if (isNaN(y) || !Number.isFinite(y)) continue;
 
             const canvasX = (x - xRange.min) * xScale;
             const canvasY = height - (y - yRange.min) * yScale;
