@@ -37,6 +37,55 @@ export default function EquationEditorPage() {
     { name: "Euler's Identity", latex: "e^{i\\pi} + 1 = 0" }
   ];
 
+  // LaTeX tips with code examples
+  const latexTips = [
+    { 
+      name: "Fractions", 
+      code: "\\frac{numerator}{denominator}", 
+      example: "\\frac{x+1}{x-1}" 
+    },
+    { 
+      name: "Powers", 
+      code: "x^{power}", 
+      example: "x^{2n+1}" 
+    },
+    { 
+      name: "Subscripts", 
+      code: "x_{subscript}", 
+      example: "x_{i,j}" 
+    },
+    { 
+      name: "Square Root", 
+      code: "\\sqrt{x}", 
+      example: "\\sqrt{x^2 + y^2}" 
+    },
+    { 
+      name: "Greek Letters", 
+      code: "\\alpha, \\beta, \\gamma", 
+      example: "\\alpha + \\beta = \\gamma" 
+    },
+    { 
+      name: "Infinity", 
+      code: "\\infty", 
+      example: "\\lim_{x \\to \\infty} f(x)" 
+    },
+    { 
+      name: "Summation", 
+      code: "\\sum_{i=0}^{n} x_i", 
+      example: "\\sum_{i=1}^{n} i^2 = \\frac{n(n+1)(2n+1)}{6}" 
+    },
+    { 
+      name: "Integration", 
+      code: "\\int_{a}^{b} f(x) dx", 
+      example: "\\int_{0}^{\\pi} \\sin(x) dx = 2" 
+    },
+    { 
+      name: "Matrices", 
+      code: "\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}", 
+      example: "\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} \\cdot \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} ax + by \\\\ cx + dy \\end{pmatrix}" 
+    }
+  ];
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -115,18 +164,19 @@ export default function EquationEditorPage() {
               <div className="space-y-2 text-sm">
                 <p className="font-medium">Common Symbols:</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Fractions: <code>\frac{num}{denom}</code></li>
-                  <li>Powers: <code>x^{power}</code></li>
-                  <li>Subscripts: <code>x_{subscript}</code></li>
-                  <li>Square root: <code>\sqrt{x}</code></li>
-                  <li>Greek letters: <code>\alpha, \beta, \gamma</code></li>
-                  <li>Infinity: <code>\infty</code></li>
+                  {latexTips.slice(0, 6).map((tip, index) => (
+                    <li key={index}>
+                      {tip.name}: <code>{tip.code}</code>
+                    </li>
+                  ))}
                 </ul>
                 <p className="font-medium mt-3">Structures:</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Summation: <code>\sum_{i=0}^{n} x_i</code></li>
-                  <li>Integration: <code>\int_{a}^{b} f(x) dx</code></li>
-                  <li>Matrices: <code>\begin{matrix}...</code></li>
+                  {latexTips.slice(6).map((tip, index) => (
+                    <li key={index}>
+                      {tip.name}: <code>{tip.code}</code>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </CardContent>
