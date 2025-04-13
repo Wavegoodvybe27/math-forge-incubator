@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { FunctionPlotter } from "@/components/FunctionPlotter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LineCurve, Circle, ArrowRight } from "lucide-react";
+import { LineChart, Circle, ArrowRight } from "lucide-react";
 
 export default function FunctionPlotterPage() {
   const exampleFunctions = [
@@ -57,7 +57,7 @@ export default function FunctionPlotterPage() {
             <CardContent className="text-sm space-y-3">
               <div>
                 <p className="font-medium flex items-center">
-                  <LineCurve className="h-4 w-4 mr-1 text-math-primary" />
+                  <LineChart className="h-4 w-4 mr-1 text-math-primary" />
                   Multiple Functions
                 </p>
                 <p className="mt-1">

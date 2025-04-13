@@ -1,7 +1,7 @@
 
 import { 
   LayoutDashboard, 
-  Function, 
+  CodeSquare, 
   LineChart, 
   FileText, 
   Settings, 
@@ -34,7 +34,7 @@ const menuItems = [
   },
   {
     title: "Equation Editor",
-    icon: Function,
+    icon: CodeSquare,
     path: "/equation-editor"
   },
   {

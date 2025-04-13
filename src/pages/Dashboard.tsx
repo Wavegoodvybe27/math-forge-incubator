@@ -2,7 +2,7 @@
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Function, LineChart, FileText, Calculator, Brain } from "lucide-react";
+import { CodeSquare, LineChart, FileText, Calculator, Brain } from "lucide-react";
 import { Link } from "react-router-dom";
 import { EquationEditor } from "@/components/EquationEditor";
 
@@ -35,7 +35,7 @@ export default function Dashboard() {
             <div className="flex flex-wrap gap-2">
               <Link to="/equation-editor">
                 <Button>
-                  <Function className="mr-2 h-4 w-4" />
+                  <CodeSquare className="mr-2 h-4 w-4" />
                   Start with Equations
                 </Button>
               </Link>
@@ -57,7 +57,7 @@ export default function Dashboard() {
             <div className="space-y-2">
               <Link to="/equation-editor" className="w-full">
                 <Button variant="outline" className="w-full justify-start">
-                  <Function className="mr-2 h-5 w-5 text-math-primary" />
+                  <CodeSquare className="mr-2 h-5 w-5 text-math-primary" />
                   Equation Editor
                 </Button>
               </Link>
