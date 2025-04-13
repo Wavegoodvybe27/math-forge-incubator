@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +11,22 @@ import {
   LineChart,
   Trash2,
   RefreshCw,
-  Plus
+  Plus,
+  ArrowLeft,
+  Braces,
+  Divide,
+  Equal,
+  Percent,
+  RotateCcw
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 
 export function Calculator() {
   const [input, setInput] = useState("");
@@ -22,12 +34,17 @@ export function Calculator() {
   const [mode, setMode] = useState<"standard" | "scientific">("standard");
   const [graphMode, setGraphMode] = useState(false);
   
-  // Graph state
   const [functions, setFunctions] = useState<Array<{ id: number; expression: string; color: string }>>([
     { id: 1, expression: "x^2", color: "#7C3AED" }
   ]);
   const [xRange, setXRange] = useState<{ min: number; max: number }>({ min: -10, max: 10 });
   const [yRange, setYRange] = useState<{ min: number; max: number }>({ min: -10, max: 10 });
+  const [memory, setMemory] = useState<number | null>(null);
+  const [angleUnit, setAngleUnit] = useState<"deg" | "rad">("deg");
+  const [base, setBase] = useState<"dec" | "bin" | "hex" | "oct">("dec");
+  const [constantsActive, setConstantsActive] = useState(false);
+  const [advancedActive, setAdvancedActive] = useState(false);
+  
   const { toast } = useToast();
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
 
@@ -38,6 +55,97 @@ export function Calculator() {
       setInput("");
     } else if (value === "⌫") {
       setInput(input.slice(0, -1));
+    } else if (value === "MS") {
+      try {
+        const result = math.evaluate(input);
+        setMemory(result);
+        toast({
+          title: "Saved to memory",
+          description: `Value ${result} stored in memory.`,
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Invalid expression to store in memory.",
+          variant: "destructive",
+        });
+      }
+    } else if (value === "MR") {
+      if (memory !== null) {
+        setInput(input + memory.toString());
+      } else {
+        toast({
+          title: "Memory empty",
+          description: "There is no value stored in memory.",
+          variant: "destructive",
+        });
+      }
+    } else if (value === "MC") {
+      setMemory(null);
+      toast({
+        title: "Memory cleared",
+        description: "Memory has been cleared.",
+      });
+    } else if (value === "M+") {
+      try {
+        const result = math.evaluate(input);
+        if (memory !== null) {
+          setMemory(memory + result);
+          toast({
+            title: "Memory updated",
+            description: `Added ${result} to memory. New value: ${memory + result}`,
+          });
+        } else {
+          setMemory(result);
+          toast({
+            title: "Memory set",
+            description: `Set memory to ${result}`,
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Invalid expression for memory operation.",
+          variant: "destructive",
+        });
+      }
+    } else if (value === "M-") {
+      try {
+        const result = math.evaluate(input);
+        if (memory !== null) {
+          setMemory(memory - result);
+          toast({
+            title: "Memory updated",
+            description: `Subtracted ${result} from memory. New value: ${memory - result}`,
+          });
+        } else {
+          setMemory(-result);
+          toast({
+            title: "Memory set",
+            description: `Set memory to -${result}`,
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Invalid expression for memory operation.",
+          variant: "destructive",
+        });
+      }
+    } else if (value === "2nd") {
+      setAdvancedActive(!advancedActive);
+    } else if (value === "mod") {
+      setInput(input + " % ");
+    } else if (value === "rand") {
+      setInput(input + "random()");
+    } else if (value === "EE") {
+      setInput(input + "e");
+    } else if (value === "inv") {
+      setInput(`1/(${input})`);
+    } else if (value === "nPr") {
+      setInput(input + " permutations ");
+    } else if (value === "nCr") {
+      setInput(input + " combinations ");
     } else {
       setInput(input + value);
     }
@@ -47,10 +155,48 @@ export function Calculator() {
     if (!input) return;
 
     try {
-      const result = math.evaluate(input);
-      const formattedResult = typeof result === "number" && !Number.isInteger(result)
-        ? Number(result.toFixed(8)).toString()
-        : result.toString();
+      const scope: any = {};
+      
+      const customTrig = angleUnit === "deg" ? {
+        sin: (x: number) => math.sin(math.unit(x, 'deg')),
+        cos: (x: number) => math.cos(math.unit(x, 'deg')),
+        tan: (x: number) => math.tan(math.unit(x, 'deg')),
+        asin: (x: number) => math.asin(x) * 180 / Math.PI,
+        acos: (x: number) => math.acos(x) * 180 / Math.PI,
+        atan: (x: number) => math.atan(x) * 180 / Math.PI,
+      } : {};
+      
+      Object.assign(scope, customTrig);
+      
+      let processedInput = input;
+      if (base === "bin") {
+        processedInput = processedInput.replace(/0b[01]+/g, (match) => 
+          parseInt(match.substring(2), 2).toString()
+        );
+      } else if (base === "hex") {
+        processedInput = processedInput.replace(/0x[0-9a-fA-F]+/g, (match) => 
+          parseInt(match.substring(2), 16).toString()
+        );
+      } else if (base === "oct") {
+        processedInput = processedInput.replace(/0o[0-7]+/g, (match) => 
+          parseInt(match.substring(2), 8).toString()
+        );
+      }
+
+      const result = math.evaluate(processedInput, scope);
+      let formattedResult: string;
+      
+      if (base === "bin" && typeof result === "number" && result % 1 === 0) {
+        formattedResult = "0b" + Math.floor(result).toString(2);
+      } else if (base === "hex" && typeof result === "number" && result % 1 === 0) {
+        formattedResult = "0x" + Math.floor(result).toString(16).toUpperCase();
+      } else if (base === "oct" && typeof result === "number" && result % 1 === 0) {
+        formattedResult = "0o" + Math.floor(result).toString(8);
+      } else {
+        formattedResult = typeof result === "number" && !Number.isInteger(result)
+          ? Number(result.toFixed(8)).toString()
+          : result.toString();
+      }
       
       setHistory([{ expression: input, result: formattedResult }, ...history]);
       setInput(formattedResult);
@@ -79,7 +225,6 @@ export function Calculator() {
     }
   };
 
-  // Graph functions
   const addFunction = () => {
     const colors = ["#7C3AED", "#4F46E5", "#A78BFA", "#5B21B6", "#818CF8"];
     const newId = Math.max(0, ...functions.map(f => f.id)) + 1;
@@ -114,21 +259,17 @@ export function Calculator() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Set up coordinate system
     const width = canvas.width;
     const height = canvas.height;
     const xScale = width / (xRange.max - xRange.min);
     const yScale = height / (yRange.max - yRange.min);
 
-    // Draw axes
     ctx.beginPath();
     ctx.strokeStyle = "#CBD5E1";
     ctx.lineWidth = 1;
 
-    // Draw grid
     const gridStep = Math.max(1, Math.floor((xRange.max - xRange.min) / 20));
     for (let x = Math.ceil(xRange.min / gridStep) * gridStep; x <= xRange.max; x += gridStep) {
       const canvasX = (x - xRange.min) * xScale;
@@ -142,23 +283,19 @@ export function Calculator() {
     }
     ctx.stroke();
 
-    // Draw x and y axes
     ctx.beginPath();
     ctx.strokeStyle = "#64748B";
     ctx.lineWidth = 2;
     
-    // x-axis
     const yAxisPos = height - (-yRange.min) * yScale;
     ctx.moveTo(0, yAxisPos);
     ctx.lineTo(width, yAxisPos);
 
-    // y-axis
     const xAxisPos = (-xRange.min) * xScale;
     ctx.moveTo(xAxisPos, 0);
     ctx.lineTo(xAxisPos, height);
     ctx.stroke();
 
-    // Plot functions
     functions.forEach(func => {
       if (!func.expression.trim()) return;
 
@@ -178,7 +315,6 @@ export function Calculator() {
           try {
             const y = compiledFunction.evaluate({ x });
             
-            // Fix for the math.isFinite error - use Number.isFinite instead
             if (isNaN(y) || !Number.isFinite(y)) continue;
 
             const canvasX = (x - xRange.min) * xScale;
@@ -193,7 +329,6 @@ export function Calculator() {
               ctx.lineTo(canvasX, canvasY);
             }
           } catch (e) {
-            // Skip this point if evaluation fails
             continue;
           }
         }
@@ -204,7 +339,6 @@ export function Calculator() {
     });
   };
 
-  // Set up the canvas reference and handle resize
   const canvasRefCallback = (element: HTMLCanvasElement | null) => {
     if (element) {
       setCanvasRef(element);
@@ -214,7 +348,6 @@ export function Calculator() {
     }
   };
 
-  // Redraw graph when any relevant state changes
   const handleUpdateGraph = () => {
     setTimeout(drawGraph, 0);
     toast({
@@ -225,11 +358,36 @@ export function Calculator() {
 
   const toggleGraphMode = () => {
     setGraphMode(!graphMode);
-    // Allow time for the canvas to be rendered before drawing
     if (!graphMode) {
       setTimeout(drawGraph, 100);
     }
   };
+
+  const mathematicalConstants = [
+    { name: "π (Pi)", value: "pi", display: "π" },
+    { name: "e (Euler's number)", value: "e", display: "e" },
+    { name: "φ (Golden ratio)", value: "(1+sqrt(5))/2", display: "φ" },
+    { name: "γ (Euler-Mascheroni)", value: "0.57721566490153", display: "γ" },
+    { name: "ζ(3) (Apéry's constant)", value: "1.2020569", display: "ζ(3)" },
+    { name: "√2 (Pythagoras' constant)", value: "sqrt(2)", display: "√2" },
+    { name: "ln(2) (Natural log of 2)", value: "log(2)", display: "ln(2)" },
+    { name: "∞ (Infinity)", value: "Infinity", display: "∞" }
+  ];
+
+  const advancedFunctions = [
+    { name: "Gamma function", value: "gamma(", display: "Γ(" },
+    { name: "Error function", value: "erf(", display: "erf(" },
+    { name: "Lambert W", value: "lambertw(", display: "W(" },
+    { name: "Beta function", value: "beta(", display: "β(" },
+    { name: "Bessel function J", value: "besselj(", display: "J(" },
+    { name: "Bessel function Y", value: "bessely(", display: "Y(" },
+    { name: "Hyperbolic sine", value: "sinh(", display: "sinh(" },
+    { name: "Hyperbolic cosine", value: "cosh(", display: "cosh(" },
+    { name: "Hyperbolic tangent", value: "tanh(", display: "tanh(" },
+    { name: "Inverse hyperbolic sine", value: "asinh(", display: "asinh(" },
+    { name: "Inverse hyperbolic cosine", value: "acosh(", display: "acosh(" },
+    { name: "Inverse hyperbolic tangent", value: "atanh(", display: "atanh(" }
+  ];
 
   return (
     <Tabs defaultValue="calculator" className="w-full">
@@ -259,7 +417,7 @@ export function Calculator() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex mb-2 gap-2">
+              <div className="flex mb-2 gap-2 flex-wrap">
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -276,6 +434,37 @@ export function Calculator() {
                 >
                   Scientific
                 </Button>
+                {mode === "scientific" && (
+                  <>
+                    <Select
+                      value={angleUnit}
+                      onValueChange={(value: "deg" | "rad") => setAngleUnit(value)}
+                    >
+                      <SelectTrigger className="w-[100px] h-9">
+                        <SelectValue placeholder="Angle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="deg">Degrees</SelectItem>
+                        <SelectItem value="rad">Radians</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Select
+                      value={base}
+                      onValueChange={(value: "dec" | "bin" | "hex" | "oct") => setBase(value)}
+                    >
+                      <SelectTrigger className="w-[100px] h-9">
+                        <SelectValue placeholder="Base" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dec">Decimal</SelectItem>
+                        <SelectItem value="bin">Binary</SelectItem>
+                        <SelectItem value="hex">Hexadecimal</SelectItem>
+                        <SelectItem value="oct">Octal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </>
+                )}
               </div>
               
               <Input
@@ -285,6 +474,67 @@ export function Calculator() {
                 className="text-xl h-14 font-mono text-right"
                 placeholder="0"
               />
+
+              {mode === "scientific" && (
+                <div className="flex gap-1 flex-wrap">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setConstantsActive(!constantsActive)}
+                    className={constantsActive ? "bg-accent" : ""}
+                  >
+                    <Braces className="h-4 w-4 mr-1" />
+                    Constants
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setAdvancedActive(!advancedActive)}
+                    className={advancedActive ? "bg-accent" : ""}
+                  >
+                    Advanced
+                  </Button>
+                  
+                  {memory !== null && (
+                    <div className="ml-auto text-sm bg-secondary/30 px-2 py-1 rounded-md">
+                      M: {memory}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {constantsActive && mode === "scientific" && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 mb-2 p-2 border rounded-md bg-secondary/10">
+                  {mathematicalConstants.map((constant) => (
+                    <Button 
+                      key={constant.value} 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 text-sm justify-start"
+                      onClick={() => handleButtonClick(constant.value)}
+                    >
+                      {constant.display} - {constant.name}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              
+              {advancedActive && mode === "scientific" && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 mb-2 p-2 border rounded-md bg-secondary/10">
+                  {advancedFunctions.map((func) => (
+                    <Button 
+                      key={func.value} 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 text-sm justify-start"
+                      onClick={() => handleButtonClick(func.value)}
+                    >
+                      {func.display}
+                    </Button>
+                  ))}
+                </div>
+              )}
 
               {graphMode && (
                 <div className="space-y-4 mb-4 animate-fade-in">
@@ -400,48 +650,77 @@ export function Calculator() {
                   </>
                 ) : (
                   <>
-                    <Button variant="outline" onClick={() => handleButtonClick("(")}>(</Button>
-                    <Button variant="outline" onClick={() => handleButtonClick(")")}>)</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("MC")}>MC</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("MR")}>MR</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("MS")}>MS</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("M+")}>M+</Button>
+                    
+                    <Button variant="secondary" onClick={() => handleButtonClick("(")}>(</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick(")")}>)</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("nPr")}>nPr</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("nCr")}>nCr</Button>
+                    
+                    <Button variant="secondary" onClick={() => handleButtonClick("inv")}>1/x</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("x^2")}>x²</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("x^3")}>x³</Button>
                     <Button variant="secondary" onClick={() => handleButtonClick("^")}>x^y</Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("/")}>÷</Button>
                     
-                    <Button variant="outline" onClick={() => handleButtonClick("7")}>7</Button>
-                    <Button variant="outline" onClick={() => handleButtonClick("8")}>8</Button>
-                    <Button variant="outline" onClick={() => handleButtonClick("9")}>9</Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("*")}>×</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("10^")}>10^x</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("sqrt(")}>√</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("cbrt(")}>∛</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("nthRoot(")}>ⁿ√</Button>
                     
-                    <Button variant="outline" onClick={() => handleButtonClick("4")}>4</Button>
-                    <Button variant="outline" onClick={() => handleButtonClick("5")}>5</Button>
-                    <Button variant="outline" onClick={() => handleButtonClick("6")}>6</Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("-")}>−</Button>
-                    
-                    <Button variant="outline" onClick={() => handleButtonClick("1")}>1</Button>
-                    <Button variant="outline" onClick={() => handleButtonClick("2")}>2</Button>
-                    <Button variant="outline" onClick={() => handleButtonClick("3")}>3</Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("+")}>+</Button>
-                    
-                    <Button variant="outline" onClick={() => handleButtonClick("0")}>0</Button>
-                    <Button variant="outline" onClick={() => handleButtonClick(".")}>.</Button>
-                    <Button variant="default" onClick={() => handleButtonClick("=")}>=</Button>
-                    <Button variant="destructive" onClick={() => handleButtonClick("C")}>C</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("log(")}>log₁₀</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("log2(")}>log₂</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("ln(")}>ln</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("log(,")}>logₙ</Button>
                     
                     <Button variant="secondary" onClick={() => handleButtonClick("sin(")}>sin</Button>
                     <Button variant="secondary" onClick={() => handleButtonClick("cos(")}>cos</Button>
                     <Button variant="secondary" onClick={() => handleButtonClick("tan(")}>tan</Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("⌫")}>⌫</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("/")}>÷</Button>
                     
-                    <Button variant="secondary" onClick={() => handleButtonClick("sqrt(")}>√</Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("log(")}>log</Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("ln(")}>ln</Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("pi")}>π</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("asin(")}>sin⁻¹</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("acos(")}>cos⁻¹</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("atan(")}>tan⁻¹</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("*")}>×</Button>
                     
-                    <Button variant="secondary" onClick={() => handleButtonClick("abs(")}>|x|</Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("e")}>e</Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("!")}><span className="text-xs">x!</span></Button>
-                    <Button variant="secondary" onClick={() => handleButtonClick("%")}>%</Button>
+                    <Button variant="outline" onClick={() => handleButtonClick("7")}>7</Button>
+                    <Button variant="outline" onClick={() => handleButtonClick("8")}>8</Button>
+                    <Button variant="outline" onClick={() => handleButtonClick("9")}>9</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("-")}>−</Button>
+                    
+                    <Button variant="outline" onClick={() => handleButtonClick("4")}>4</Button>
+                    <Button variant="outline" onClick={() => handleButtonClick("5")}>5</Button>
+                    <Button variant="outline" onClick={() => handleButtonClick("6")}>6</Button>
+                    <Button variant="secondary" onClick={() => handleButtonClick("+")}>+</Button>
+                    
+                    <Button variant="outline" onClick={() => handleButtonClick("1")}>1</Button>
+                    <Button variant="outline" onClick={() => handleButtonClick("2")}>2</Button>
+                    <Button variant="outline" onClick={() => handleButtonClick("3")}>3</Button>
+                    <Button variant="default" onClick={() => handleButtonClick("=")}>=</Button>
+                    
+                    <Button variant="outline" onClick={() => handleButtonClick("0")}>0</Button>
+                    <Button variant="outline" onClick={() => handleButtonClick(".")}>.</Button>
+                    <Button variant="outline" onClick={() => handleButtonClick("EE")}>EE</Button>
+                    <Button variant="destructive" onClick={() => handleButtonClick("C")}>C</Button>
                   </>
                 )}
               </div>
+              
+              {mode === "scientific" && (
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  <Button variant="secondary" onClick={() => handleButtonClick("mod")}>mod</Button>
+                  <Button variant="secondary" onClick={() => handleButtonClick("abs(")}>|x|</Button>
+                  <Button variant="secondary" onClick={() => handleButtonClick("floor(")}>⌊x⌋</Button>
+                  <Button variant="secondary" onClick={() => handleButtonClick("ceil(")}>⌈x⌉</Button>
+                  
+                  <Button variant="secondary" onClick={() => handleButtonClick("factorial(")}>x!</Button>
+                  <Button variant="secondary" onClick={() => handleButtonClick("rand")}>rand</Button>
+                  <Button variant="secondary" onClick={() => handleButtonClick("%")}>%</Button>
+                  <Button variant="secondary" onClick={() => handleButtonClick("⌫")}>⌫</Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
