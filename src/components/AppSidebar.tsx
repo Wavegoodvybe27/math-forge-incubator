@@ -6,7 +6,11 @@ import {
   FileText, 
   Settings, 
   BookOpen, 
-  Calculator
+  Calculator,
+  Triangle,
+  Compass,
+  Square,
+  Infinity
 } from "lucide-react";
 
 import {
@@ -54,6 +58,29 @@ const menuItems = [
   }
 ];
 
+const geometryItems = [
+  {
+    title: "Sacred Geometry",
+    icon: Triangle,
+    path: "/sacred-geometry"
+  },
+  {
+    title: "Euclidean Geometry",
+    icon: Compass,
+    path: "/euclidean-geometry"
+  },
+  {
+    title: "2D Geometry",
+    icon: Square,
+    path: "/2d-geometry"
+  },
+  {
+    title: "Non-Euclidean Geometry",
+    icon: Infinity,
+    path: "/non-euclidean-geometry"
+  }
+];
+
 const resourceItems = [
   {
     title: "Documentation",
@@ -81,6 +108,29 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to={item.path}
+                      className={({ isActive }) => 
+                        cn("flex items-center gap-2", isActive && "text-math-primary font-medium")
+                      }
+                    >
+                      <item.icon className="w-5 h-5" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Geometry</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {geometryItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 

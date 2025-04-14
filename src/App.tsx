@@ -13,6 +13,10 @@ import CalculatorPage from "./pages/CalculatorPage";
 import DocumentationPage from "./pages/DocumentationPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import SacredGeometryPage from "./pages/SacredGeometryPage";
+import EuclideanGeometryPage from "./pages/EuclideanGeometryPage";
+import TwoDGeometryPage from "./pages/TwoDGeometryPage";
+import NonEuclideanGeometryPage from "./pages/NonEuclideanGeometryPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +34,10 @@ const App = () => (
           <Route path="/calculator" element={<MainLayout><CalculatorPage /></MainLayout>} />
           <Route path="/documentation" element={<MainLayout><DocumentationPage /></MainLayout>} />
           <Route path="/settings" element={<MainLayout><SettingsPage /></MainLayout>} />
+          <Route path="/sacred-geometry" element={<MainLayout><SacredGeometryPage /></MainLayout>} />
+          <Route path="/euclidean-geometry" element={<MainLayout><EuclideanGeometryPage /></MainLayout>} />
+          <Route path="/2d-geometry" element={<MainLayout><TwoDGeometryPage /></MainLayout>} />
+          <Route path="/non-euclidean-geometry" element={<MainLayout><NonEuclideanGeometryPage /></MainLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
