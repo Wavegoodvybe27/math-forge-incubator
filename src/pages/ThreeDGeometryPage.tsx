@@ -1,4 +1,3 @@
-
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,7 +6,7 @@ import { OrbitControls } from "@react-three/drei";
 import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Cube, Sphere, Box3d, Cylinder } from "lucide-react";
+import { Box, Square, Cylinder } from "lucide-react";
 
 const BasicShapes = () => {
   const [selectedShape, setSelectedShape] = useState<string>("cube");
@@ -67,7 +66,7 @@ const BasicShapes = () => {
               variant={selectedShape === "cube" ? "default" : "outline"}
               className="flex items-center gap-2"
             >
-              <Box3d className="h-4 w-4" />
+              <Box className="h-4 w-4" />
               Cube
             </Button>
             <Button
@@ -75,7 +74,7 @@ const BasicShapes = () => {
               variant={selectedShape === "sphere" ? "default" : "outline"}
               className="flex items-center gap-2"
             >
-              <Sphere className="h-4 w-4" />
+              <div className="h-4 w-4 rounded-full border-2" />
               Sphere
             </Button>
             <Button

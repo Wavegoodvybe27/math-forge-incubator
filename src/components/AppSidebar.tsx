@@ -11,7 +11,7 @@ import {
   Compass,
   Square,
   Infinity,
-  Cube
+  Box
 } from "lucide-react";
 
 import {
@@ -77,7 +77,7 @@ const geometryItems = [
   },
   {
     title: "3D Geometry",
-    icon: Cube,
+    icon: Box,
     path: "/3d-geometry"
   },
   {
