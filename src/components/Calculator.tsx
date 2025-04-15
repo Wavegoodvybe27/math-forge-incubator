@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Card,
@@ -31,7 +30,7 @@ const operations = [
   { value: 'tan', label: 'Tangent (tan)' },
 ];
 
-const Calculator = () => {
+export const Calculator: React.FC = () => {
   const [num1, setNum1] = useState<string>('0');
   const [num2, setNum2] = useState<string>('0');
   const [operation, setOperation] = useState('add');
