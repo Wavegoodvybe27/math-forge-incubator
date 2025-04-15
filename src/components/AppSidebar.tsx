@@ -10,7 +10,8 @@ import {
   Triangle,
   Compass,
   Square,
-  Infinity
+  Infinity,
+  Cube
 } from "lucide-react";
 
 import {
@@ -73,6 +74,11 @@ const geometryItems = [
     title: "2D Geometry",
     icon: Square,
     path: "/2d-geometry"
+  },
+  {
+    title: "3D Geometry",
+    icon: Cube,
+    path: "/3d-geometry"
   },
   {
     title: "Non-Euclidean Geometry",

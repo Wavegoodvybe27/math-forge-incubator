@@ -1,9 +1,9 @@
-
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Circle, Square, Triangle, Hexagon, Pentagon } from "lucide-react";
 import { InlineMath, BlockMath } from "react-katex";
+import TwoDShapeSimulation from "@/components/TwoDShapeSimulation";
 import "katex/dist/katex.min.css";
 
 const shapes = [
@@ -99,10 +99,11 @@ export default function TwoDGeometryPage() {
       />
       
       <Tabs defaultValue="shapes" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="shapes">Shapes & Formulas</TabsTrigger>
           <TabsTrigger value="transformations">Transformations</TabsTrigger>
           <TabsTrigger value="coordinate">Coordinate Geometry</TabsTrigger>
+          <TabsTrigger value="simulation">Shape Simulation</TabsTrigger>
         </TabsList>
         
         <TabsContent value="shapes" className="space-y-6">
@@ -231,6 +232,10 @@ export default function TwoDGeometryPage() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="simulation" className="space-y-6">
+          <TwoDShapeSimulation />
         </TabsContent>
       </Tabs>
     </div>
