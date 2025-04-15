@@ -1,10 +1,9 @@
-
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Box, Square, Cylinder } from "lucide-react";
@@ -456,7 +455,6 @@ const Polyhedra = () => {
   );
 };
 
-// Helper component for animated polyhedra
 const AnimatedPolyhedron = ({ 
   position, 
   geometry, 
@@ -482,7 +480,6 @@ const AnimatedPolyhedron = ({
     return () => cancelAnimationFrame(animationId);
   }, [rotationSpeed]);
   
-  // Function to get the correct geometry based on the type
   const getGeometry = () => {
     switch (geometry) {
       case "tetrahedron":
@@ -496,15 +493,15 @@ const AnimatedPolyhedron = ({
       case "box":
         return <boxGeometry args={[size, size, size]} />;
       case "truncatedTetrahedron":
-        return <sphereGeometry args={[size, 32, 16]} />; // Simplified approximation
+        return <sphereGeometry args={[size, 32, 16]} />;
       case "truncatedOctahedron":
-        return <sphereGeometry args={[size, 32, 16]} />; // Simplified approximation
+        return <sphereGeometry args={[size, 32, 16]} />;
       case "truncatedIcosahedron":
-        return <sphereGeometry args={[size, 32, 16]} />; // Simplified approximation (soccer ball)
+        return <sphereGeometry args={[size, 32, 16]} />;
       case "cuboctahedron":
-        return <sphereGeometry args={[size, 32, 16]} />; // Simplified approximation
+        return <sphereGeometry args={[size, 32, 16]} />;
       case "icosidodecahedron":
-        return <sphereGeometry args={[size, 32, 16]} />; // Simplified approximation
+        return <sphereGeometry args={[size, 32, 16]} />;
       case "triangularPrism":
         return <cylinderGeometry args={[size, size, size * 2, 3]} />;
       case "pentagonalPrism":
