@@ -1,10 +1,11 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Circle, Square, Triangle, Hexagon, Pentagon, Octagon, Star } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { calculateShapeProperties } from "@/utils/shapeUtils";
 
 const TwoDShapeSimulation = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -22,6 +23,7 @@ const TwoDShapeSimulation = () => {
   const [fillStyle, setFillStyle] = useState<string>("solid");
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const [gridSize, setGridSize] = useState<number>(25);
+  const [shapeProperties, setShapeProperties] = useState<any>(null);
   const animationRef = useRef<number | null>(null);
   
   const drawShape = () => {
@@ -314,6 +316,11 @@ const TwoDShapeSimulation = () => {
     };
   }, [selectedShape, fillColor, strokeColor, strokeWidth, size, rotation, position, sides, fillStyle, showGrid, gridSize]);
   
+  useEffect(() => {
+    const properties = calculateShapeProperties(selectedShape, size, sides);
+    setShapeProperties(properties);
+  }, [selectedShape, size, sides]);
+  
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <Card className="lg:col-span-2">
@@ -336,6 +343,35 @@ const TwoDShapeSimulation = () => {
               onTouchEnd={handleCanvasTouchEnd}
             />
           </div>
+          
+          <Card className="mt-4">
+            <CardHeader className="py-2">
+              <CardTitle className="text-sm">Shape Properties</CardTitle>
+            </CardHeader>
+            <CardContent className="py-2">
+              {shapeProperties ? (
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {Object.entries(shapeProperties).map(([key, value]: [string, any]) => (
+                    <div key={key} className="flex justify-between">
+                      <span className="font-medium">{key}:</span>
+                      <span>{typeof value === 'number' ? value.toFixed(4) : value.toString()}</span>
+                    </div>
+                  ))}
+                  {shapeProperties.goldenRatio && (
+                    <div className="col-span-2 mt-2 bg-yellow-50 p-2 rounded-md border border-yellow-200">
+                      <p className="text-xs text-amber-700">
+                        <span className="font-semibold">Golden Ratio (φ): </span>
+                        This shape exhibits the golden ratio (1.618...) in its proportions
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Select a shape to see its properties</p>
+              )}
+            </CardContent>
+          </Card>
+          
           <div className="flex flex-wrap gap-2 justify-between mt-4">
             <p className="text-xs text-muted-foreground text-center">
               Click and drag to move the shape

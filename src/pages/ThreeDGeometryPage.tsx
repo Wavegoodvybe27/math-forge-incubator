@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { PageHeader } from "@/components/PageHeader";
 import { Canvas } from '@react-three/fiber';
@@ -26,6 +25,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { calculate3DShapeProperties } from "@/utils/shapeUtils";
 
 // Basic shapes section
 const Box = ({ position = [0, 0, 0], color = 'orange', scale = 1 }) => {
@@ -342,6 +342,41 @@ const NonEuclideanGeometry = ({ type = "hyperbolic" }) => {
   );
 };
 
+// Shape properties display component
+const ShapePropertiesCard = ({ shapeType, scale = 1 }) => {
+  const properties = calculate3DShapeProperties(shapeType, scale);
+  
+  return (
+    <Card className="mt-4">
+      <CardHeader className="py-2">
+        <CardTitle className="text-sm">Shape Properties</CardTitle>
+      </CardHeader>
+      <CardContent className="py-2">
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          {Object.entries(properties).map(([key, value]: [string, any]) => {
+            if (key === "goldenRatio") return null; // Skip this field in the mapping
+            return (
+              <div key={key} className="flex justify-between">
+                <span className="font-medium">{key}:</span>
+                <span>{typeof value === 'number' ? value.toFixed(4) : value.toString()}</span>
+              </div>
+            );
+          })}
+        </div>
+        
+        {properties.goldenRatio && (
+          <div className="mt-3 bg-yellow-50 p-2 rounded-md border border-yellow-200">
+            <p className="text-xs text-amber-700">
+              <span className="font-semibold">Golden Ratio (φ = 1.618...): </span>
+              This shape exhibits proportions related to the golden ratio
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 // Scene setup component
 const Scene = ({ children }) => {
   return (
@@ -360,9 +395,10 @@ export default function ThreeDGeometryPage() {
   const [basicShape, setBasicShape] = useState('cube');
   const [polyhedronType, setPolyhedronType] = useState('platonic');
   const [platonicShape, setPlatonicShape] = useState('tetrahedron');
-  const [archimedeanShape, setArchimedeanShape] = useState('truncated-tetrahedron');
+  const [archimedeanShape, setArchimedianShape] = useState('truncated-tetrahedron');
   const [stellatedShape, setStellatedShape] = useState('stellated-octahedron');
   const [nonEuclideanType, setNonEuclideanType] = useState('hyperbolic');
+  const [scale, setScale] = useState(1);
 
   // Define the shapes for the current view
   const renderBasicShapes = () => (
@@ -393,6 +429,22 @@ export default function ThreeDGeometryPage() {
   const renderStellatedPolyhedra = () => (
     <StellatedSolid type={stellatedShape} position={[0, 0, 0]} />
   );
+
+  // Get current shape type based on selections
+  const getCurrentShapeType = () => {
+    if (currentTab === 'basic') {
+      return basicShape;
+    } else if (currentTab === 'polyhedra') {
+      if (polyhedronType === 'platonic') {
+        return platonicShape;
+      } else if (polyhedronType === 'archimedean') {
+        return archimedeanShape;
+      } else {
+        return stellatedShape;
+      }
+    }
+    return "";
+  };
 
   return (
     <div className="space-y-6">
@@ -435,6 +487,11 @@ export default function ThreeDGeometryPage() {
               <Scene>
                 {renderBasicShapes()}
               </Scene>
+              
+              {/* Shape Properties */}
+              {currentTab === 'basic' && (
+                <ShapePropertiesCard shapeType={basicShape} scale={scale} />
+              )}
             </CardContent>
             <CardFooter>
               <div className="text-sm text-muted-foreground">
@@ -512,6 +569,11 @@ export default function ThreeDGeometryPage() {
                 {polyhedronType === 'archimedean' && renderArchimedeanPolyhedra()}
                 {polyhedronType === 'stellated' && renderStellatedPolyhedra()}
               </Scene>
+              
+              {/* Shape Properties for polyhedra */}
+              {currentTab === 'polyhedra' && polyhedronType === 'platonic' && (
+                <ShapePropertiesCard shapeType={platonicShape} scale={scale} />
+              )}
             </CardContent>
             <CardFooter>
               <div className="text-sm text-muted-foreground">
