@@ -1,6 +1,6 @@
 
 import { PageHeader } from "@/components/PageHeader";
-import { Calculator } from "@/components/Calculator";
+import Calculator from "@/components/Calculator";
 
 export default function CalculatorPage() {
   return (
