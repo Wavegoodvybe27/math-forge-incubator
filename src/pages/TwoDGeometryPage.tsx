@@ -1,3 +1,4 @@
+
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -99,11 +100,12 @@ export default function TwoDGeometryPage() {
       />
       
       <Tabs defaultValue="shapes" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="shapes">Shapes & Formulas</TabsTrigger>
           <TabsTrigger value="transformations">Transformations</TabsTrigger>
           <TabsTrigger value="coordinate">Coordinate Geometry</TabsTrigger>
           <TabsTrigger value="simulation">Shape Simulation</TabsTrigger>
+          <TabsTrigger value="non-euclidean">Non-Euclidean</TabsTrigger>
         </TabsList>
         
         <TabsContent value="shapes" className="space-y-6">
@@ -236,6 +238,147 @@ export default function TwoDGeometryPage() {
         
         <TabsContent value="simulation" className="space-y-6">
           <TwoDShapeSimulation />
+        </TabsContent>
+        
+        <TabsContent value="non-euclidean" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Hyperbolic Geometry</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-math-background p-4 rounded-lg relative overflow-hidden h-80">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-64 h-64 border-2 border-math-primary rounded-full relative">
+                    {/* Poincaré disk model - hyperbolic lines as arcs perpendicular to the boundary */}
+                    {Array.from({ length: 12 }).map((_, idx) => (
+                      <div key={`line-${idx}`} 
+                           className="absolute top-1/2 left-1/2 w-full h-full -translate-x-1/2 -translate-y-1/2"
+                           style={{ 
+                             transform: `translate(-50%, -50%) rotate(${idx * 15}deg)`,
+                           }}>
+                        <div className="absolute top-0 left-1/2 w-0.5 h-1/2 bg-math-primary origin-bottom opacity-40"></div>
+                      </div>
+                    ))}
+                    
+                    {/* Hyperbolic tessellation */}
+                    {Array.from({ length: 5 }).map((_, radiusIdx) => (
+                      <div key={`circle-${radiusIdx}`} 
+                           className="absolute top-1/2 left-1/2 rounded-full border border-math-primary opacity-30"
+                           style={{ 
+                             width: `${(radiusIdx + 1) * 20}%`, 
+                             height: `${(radiusIdx + 1) * 20}%`,
+                             transform: 'translate(-50%, -50%)'
+                           }}>
+                      </div>
+                    ))}
+                    
+                    <div className="absolute inset-0 flex items-center justify-center text-xs text-math-primary">
+                      Poincaré Disk Model
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-sm p-4 border rounded-md">
+                <h3 className="font-medium mb-2">Key Properties of Hyperbolic Geometry:</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Infinite parallel lines through a point</li>
+                  <li>Triangle angle sum less than 180°</li>
+                  <li>Defect (180° - angle sum) proportional to area</li>
+                  <li>No similar triangles (except congruent ones)</li>
+                  <li>Exponential growth of circumference with radius</li>
+                </ul>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border rounded-md p-3">
+                  <h3 className="font-medium mb-2">Hyperbolic Triangle</h3>
+                  <div className="bg-math-background p-2 rounded-md mb-2">
+                    <BlockMath math="\text{Angle sum: } \alpha + \beta + \gamma < \pi" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Triangle angles in hyperbolic space sum to less than 180°</p>
+                </div>
+                
+                <div className="border rounded-md p-3">
+                  <h3 className="font-medium mb-2">Hyperbolic Distance</h3>
+                  <div className="bg-math-background p-2 rounded-md mb-2">
+                    <BlockMath math="d(P,Q) = \ln\frac{|QA||PB|}{|PA||QB|}" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Where A and B are ideal points where the geodesic through P and Q meets the boundary</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Elliptic Geometry</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-math-background p-4 rounded-lg relative overflow-hidden h-80">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-64 h-64 rounded-full bg-blue-50 relative shadow-inner">
+                    {/* Spherical model visualization */}
+                    <div className="absolute w-full h-full rounded-full border-2 border-math-primary opacity-30"></div>
+                    
+                    {/* Great circles (elliptic "lines") */}
+                    {Array.from({ length: 6 }).map((_, idx) => (
+                      <div key={`elliptic-line-${idx}`} 
+                           className="absolute top-1/2 left-1/2 w-full h-full -translate-x-1/2 -translate-y-1/2"
+                           style={{ transform: `translate(-50%, -50%) rotate(${idx * 30}deg)` }}>
+                        <div className="absolute top-0 left-1/2 w-0.5 h-full bg-math-primary -translate-x-1/2 opacity-40"></div>
+                      </div>
+                    ))}
+                    
+                    {/* Elliptic "latitude" circles */}
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <div key={`latitude-${idx}`}
+                           className="absolute top-1/2 left-1/2 rounded-full border border-math-primary opacity-30"
+                           style={{ 
+                             width: `${75 - idx * 20}%`, 
+                             height: `${75 - idx * 20}%`,
+                             transform: 'translate(-50%, -50%)'
+                           }}>
+                      </div>
+                    ))}
+                    
+                    <div className="absolute inset-0 flex items-center justify-center text-xs text-math-primary">
+                      Spherical Model
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-sm p-4 border rounded-md">
+                <h3 className="font-medium mb-2">Key Properties of Elliptic Geometry:</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>No parallel lines (all lines intersect)</li>
+                  <li>Triangle angle sum greater than 180°</li>
+                  <li>Excess (angle sum - 180°) proportional to area</li>
+                  <li>Shortest path is along a great circle (geodesic)</li>
+                  <li>Finite total area with no boundary</li>
+                </ul>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border rounded-md p-3">
+                  <h3 className="font-medium mb-2">Elliptic Triangle</h3>
+                  <div className="bg-math-background p-2 rounded-md mb-2">
+                    <BlockMath math="\text{Angle sum: } \alpha + \beta + \gamma > \pi" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Triangle angles in elliptic space sum to more than 180°</p>
+                </div>
+                
+                <div className="border rounded-md p-3">
+                  <h3 className="font-medium mb-2">Elliptic Triangle Area</h3>
+                  <div className="bg-math-background p-2 rounded-md mb-2">
+                    <BlockMath math="A = R^2(\alpha + \beta + \gamma - \pi)" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Where R is radius and α, β, γ are the angles</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

@@ -30,7 +30,7 @@ import {
 // Basic shapes section
 const Box = ({ position = [0, 0, 0], color = 'orange', scale = 1 }) => {
   return (
-    <mesh position={position}>
+    <mesh position={position as [number, number, number]}>
       <boxGeometry args={[scale, scale, scale]} />
       <meshStandardMaterial color={color} />
     </mesh>
@@ -39,7 +39,7 @@ const Box = ({ position = [0, 0, 0], color = 'orange', scale = 1 }) => {
 
 const Sphere = ({ position = [0, 0, 0], color = 'royalblue', scale = 1 }) => {
   return (
-    <mesh position={position}>
+    <mesh position={position as [number, number, number]}>
       <sphereGeometry args={[scale * 0.5, 32, 32]} />
       <meshStandardMaterial color={color} />
     </mesh>
@@ -48,7 +48,7 @@ const Sphere = ({ position = [0, 0, 0], color = 'royalblue', scale = 1 }) => {
 
 const Cylinder = ({ position = [0, 0, 0], color = 'green', scale = 1 }) => {
   return (
-    <mesh position={position}>
+    <mesh position={position as [number, number, number]}>
       <cylinderGeometry args={[scale * 0.5, scale * 0.5, scale, 32]} />
       <meshStandardMaterial color={color} />
     </mesh>
@@ -57,7 +57,7 @@ const Cylinder = ({ position = [0, 0, 0], color = 'green', scale = 1 }) => {
 
 const Cone = ({ position = [0, 0, 0], color = 'red', scale = 1 }) => {
   return (
-    <mesh position={position}>
+    <mesh position={position as [number, number, number]}>
       <coneGeometry args={[scale * 0.5, scale, 32]} />
       <meshStandardMaterial color={color} />
     </mesh>
@@ -66,7 +66,7 @@ const Cone = ({ position = [0, 0, 0], color = 'red', scale = 1 }) => {
 
 const Torus = ({ position = [0, 0, 0], color = 'purple', scale = 1 }) => {
   return (
-    <mesh position={position}>
+    <mesh position={position as [number, number, number]}>
       <torusGeometry args={[scale * 0.5, scale * 0.2, 16, 100]} />
       <meshStandardMaterial color={color} />
     </mesh>
@@ -76,7 +76,7 @@ const Torus = ({ position = [0, 0, 0], color = 'purple', scale = 1 }) => {
 // Polyhedra section
 const Tetrahedron = ({ position = [0, 0, 0], color = '#FF5733', scale = 1 }) => {
   return (
-    <mesh position={position}>
+    <mesh position={position as [number, number, number]}>
       <tetrahedronGeometry args={[scale * 0.6, 0]} />
       <meshStandardMaterial color={color} />
     </mesh>
@@ -85,7 +85,7 @@ const Tetrahedron = ({ position = [0, 0, 0], color = '#FF5733', scale = 1 }) => 
 
 const Octahedron = ({ position = [0, 0, 0], color = '#33FF57', scale = 1 }) => {
   return (
-    <mesh position={position}>
+    <mesh position={position as [number, number, number]}>
       <octahedronGeometry args={[scale * 0.6, 0]} />
       <meshStandardMaterial color={color} />
     </mesh>
@@ -94,7 +94,7 @@ const Octahedron = ({ position = [0, 0, 0], color = '#33FF57', scale = 1 }) => {
 
 const Dodecahedron = ({ position = [0, 0, 0], color = '#5733FF', scale = 1 }) => {
   return (
-    <mesh position={position}>
+    <mesh position={position as [number, number, number]}>
       <dodecahedronGeometry args={[scale * 0.6, 0]} />
       <meshStandardMaterial color={color} />
     </mesh>
@@ -103,16 +103,142 @@ const Dodecahedron = ({ position = [0, 0, 0], color = '#5733FF', scale = 1 }) =>
 
 const Icosahedron = ({ position = [0, 0, 0], color = '#FFFF33', scale = 1 }) => {
   return (
-    <mesh position={position}>
+    <mesh position={position as [number, number, number]}>
       <icosahedronGeometry args={[scale * 0.6, 0]} />
       <meshStandardMaterial color={color} />
     </mesh>
   );
 };
 
+// Enhanced ArchimedeanSolid component to make them visually distinct
+const ArchimedeanSolid = ({ type, position = [0, 0, 0], scale = 1 }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useEffect(() => {
+    if (!meshRef.current) return;
+    
+    const animate = () => {
+      if (meshRef.current) {
+        meshRef.current.rotation.x += 0.01;
+        meshRef.current.rotation.y += 0.01;
+      }
+      requestAnimationFrame(animate);
+    };
+    
+    const animationId = requestAnimationFrame(animate);
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
+
+  // Base geometry based on type
+  const getGeometry = () => {
+    switch(type) {
+      case 'truncated-tetrahedron':
+        return <octahedronGeometry args={[scale * 0.7, 1]} />;
+      case 'cuboctahedron':
+        return <dodecahedronGeometry args={[scale * 0.6, 1]} />;
+      case 'truncated-octahedron':
+        return <icosahedronGeometry args={[scale * 0.6, 1]} />;
+      case 'rhombicuboctahedron':
+        return <octahedronGeometry args={[scale * 0.7, 2]} />;
+      default:
+        return <octahedronGeometry args={[scale * 0.7, 1]} />;
+    }
+  };
+
+  // Archimedean solids have a distinctive look - use a combination of materials
+  return (
+    <group position={position as [number, number, number]}>
+      <mesh ref={meshRef}>
+        {getGeometry()}
+        <meshStandardMaterial color="#33C4FF" flatShading />
+      </mesh>
+      {/* Add wireframe overlay to distinguish from other solids */}
+      <mesh ref={meshRef}>
+        {getGeometry()}
+        <meshStandardMaterial color="#FFFFFF" wireframe opacity={0.3} transparent />
+      </mesh>
+    </group>
+  );
+};
+
+// Enhanced StellatedSolid component to make them visually distinct
+const StellatedSolid = ({ type, position = [0, 0, 0], scale = 1 }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const spikesRef = useRef<THREE.Group>(null);
+  
+  useEffect(() => {
+    if (!meshRef.current || !spikesRef.current) return;
+    
+    const animate = () => {
+      if (meshRef.current && spikesRef.current) {
+        meshRef.current.rotation.y += 0.01;
+        spikesRef.current.rotation.y -= 0.005;
+      }
+      requestAnimationFrame(animate);
+    };
+    
+    const animationId = requestAnimationFrame(animate);
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
+
+  // Get base geometry based on type
+  const getBaseGeometry = () => {
+    switch(type) {
+      case 'stellated-octahedron':
+        return <octahedronGeometry args={[scale * 0.5, 0]} />;
+      case 'stellated-dodecahedron':
+        return <dodecahedronGeometry args={[scale * 0.5, 0]} />;
+      case 'stellated-icosahedron':
+        return <icosahedronGeometry args={[scale * 0.5, 0]} />;
+      default:
+        return <octahedronGeometry args={[scale * 0.5, 0]} />;
+    }
+  };
+
+  // Stellated solids have spikes coming out
+  return (
+    <group position={position as [number, number, number]}>
+      {/* Base shape */}
+      <mesh ref={meshRef}>
+        {getBaseGeometry()}
+        <meshStandardMaterial color="#FF33A8" />
+      </mesh>
+      
+      {/* Outer spikes structure */}
+      <group ref={spikesRef}>
+        <mesh>
+          {getBaseGeometry()}
+          <meshStandardMaterial 
+            color="#FF33A8" 
+            wireframe 
+            opacity={0.7} 
+            transparent
+            emissive="#FF33A8"
+            emissiveIntensity={0.5}
+          />
+        </mesh>
+        <mesh scale={1.4}>
+          {getBaseGeometry()}
+          <meshStandardMaterial 
+            color="#FF33A8" 
+            wireframe 
+            opacity={0.3} 
+            transparent
+          />
+        </mesh>
+      </group>
+    </group>
+  );
+};
+
 // Animation component for polyhedra
 const AnimatedPolyhedron = ({ geometry, position = [0, 0, 0], color = '#FF5733', scale = 1 }) => {
-  // Fix the type error by properly typing meshRef
   const meshRef = useRef<THREE.Mesh>(null);
 
   useEffect(() => {
@@ -134,13 +260,85 @@ const AnimatedPolyhedron = ({ geometry, position = [0, 0, 0], color = '#FF5733',
   }, []);
 
   return (
-    <mesh ref={meshRef} position={position}>
+    <mesh ref={meshRef} position={position as [number, number, number]}>
       {geometry === 'tetrahedron' && <tetrahedronGeometry args={[scale * 0.6, 0]} />}
       {geometry === 'octahedron' && <octahedronGeometry args={[scale * 0.6, 0]} />}
       {geometry === 'dodecahedron' && <dodecahedronGeometry args={[scale * 0.6, 0]} />}
       {geometry === 'icosahedron' && <icosahedronGeometry args={[scale * 0.6, 0]} />}
       <meshStandardMaterial color={color} />
     </mesh>
+  );
+};
+
+// New component for Non-Euclidean geometry visualization
+const NonEuclideanGeometry = ({ type = "hyperbolic" }) => {
+  const groupRef = useRef<THREE.Group>(null);
+  
+  useEffect(() => {
+    if (!groupRef.current) return;
+    
+    const animate = () => {
+      if (groupRef.current) {
+        groupRef.current.rotation.y += 0.005;
+      }
+      requestAnimationFrame(animate);
+    };
+    
+    const animationId = requestAnimationFrame(animate);
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
+
+  // For hyperbolic space (negative curvature)
+  if (type === "hyperbolic") {
+    return (
+      <group ref={groupRef}>
+        {/* Create a grid of lines to demonstrate hyperbolic space */}
+        {Array.from({ length: 12 }).map((_, idx) => (
+          <group key={`hyperbolic-line-${idx}`} rotation={[0, Math.PI * idx / 6, 0]}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <mesh key={`mesh-${idx}-${i}`} position={[0, 0, (i + 1) * 0.4]}>
+                <sphereGeometry args={[0.05, 16, 16]} />
+                <meshStandardMaterial color="#33C4FF" />
+              </mesh>
+            ))}
+            <mesh>
+              <tubeGeometry args={[
+                new THREE.CatmullRomCurve3([
+                  new THREE.Vector3(0, 0, 0), 
+                  new THREE.Vector3(0, Math.sin(idx * 0.5) * 0.5, 2)
+                ]), 
+                20, 
+                0.02, 
+                8
+              ]} />
+              <meshStandardMaterial color="#33C4FF" />
+            </mesh>
+          </group>
+        ))}
+      </group>
+    );
+  }
+  
+  // For elliptic space (positive curvature)
+  return (
+    <group ref={groupRef}>
+      {/* Create a spherical grid to demonstrate elliptic space */}
+      <mesh>
+        <sphereGeometry args={[1.2, 32, 32]} />
+        <meshStandardMaterial color="#FF5733" wireframe opacity={0.3} transparent />
+      </mesh>
+      
+      {/* Add some great circles to show geometry on a sphere */}
+      {Array.from({ length: 8 }).map((_, idx) => (
+        <mesh key={`elliptic-circle-${idx}`} rotation={[Math.PI/2, Math.PI * idx / 4, 0]}>
+          <torusGeometry args={[1.2, 0.01, 16, 100]} />
+          <meshStandardMaterial color="#FF5733" />
+        </mesh>
+      ))}
+    </group>
   );
 };
 
@@ -164,6 +362,7 @@ export default function ThreeDGeometryPage() {
   const [platonicShape, setPlatonicShape] = useState('tetrahedron');
   const [archimedeanShape, setArchimedeanShape] = useState('truncated-tetrahedron');
   const [stellatedShape, setStellatedShape] = useState('stellated-octahedron');
+  const [nonEuclideanType, setNonEuclideanType] = useState('hyperbolic');
 
   // Define the shapes for the current view
   const renderBasicShapes = () => (
@@ -185,29 +384,14 @@ export default function ThreeDGeometryPage() {
     </>
   );
 
-  // Note: These shapes are placeholders as THREE.js doesn't have built-in archimedean and stellated polyhedra
-  // In a real application, these would be custom geometries or imported models
+  // Updated Archimedean polyhedra rendering
   const renderArchimedeanPolyhedra = () => (
-    <>
-      <Octahedron position={[0, 0, 0]} color="#33C4FF" />
-      <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[0.8, 4, 2]} />
-        <meshStandardMaterial color="#33C4FF" wireframe />
-      </mesh>
-    </>
+    <ArchimedeanSolid type={archimedeanShape} position={[0, 0, 0]} />
   );
 
+  // Updated Stellated polyhedra rendering
   const renderStellatedPolyhedra = () => (
-    <>
-      <mesh position={[0, 0, 0]}>
-        <octahedronGeometry args={[0.7, 0]} />
-        <meshStandardMaterial color="#FF33A8" />
-      </mesh>
-      <mesh position={[0, 0, 0]}>
-        <octahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial color="#FF33A8" wireframe opacity={0.5} transparent />
-      </mesh>
-    </>
+    <StellatedSolid type={stellatedShape} position={[0, 0, 0]} />
   );
 
   return (
@@ -218,9 +402,10 @@ export default function ThreeDGeometryPage() {
       />
       
       <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="basic">Basic Shapes</TabsTrigger>
           <TabsTrigger value="polyhedra">Polyhedra</TabsTrigger>
+          <TabsTrigger value="non-euclidean">Non-Euclidean</TabsTrigger>
         </TabsList>
         
         <TabsContent value="basic" className="space-y-4">
@@ -333,6 +518,42 @@ export default function ThreeDGeometryPage() {
                 {polyhedronType === 'platonic' && 'Platonic solids are regular, convex polyhedra with congruent faces of regular polygons.'}
                 {polyhedronType === 'archimedean' && 'Archimedean solids are semi-regular convex polyhedra made of regular polygons meeting in identical vertices.'}
                 {polyhedronType === 'stellated' && 'Stellated polyhedra are created by extending the faces or edges of a polyhedron until they meet to form a new polyhedron.'}
+              </div>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="non-euclidean" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Non-Euclidean 3D Geometry</CardTitle>
+              <CardDescription>
+                Explore geometries with different curvature properties than Euclidean space
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4">
+                <Select value={nonEuclideanType} onValueChange={setNonEuclideanType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select non-Euclidean type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hyperbolic">Hyperbolic (Negative Curvature)</SelectItem>
+                    <SelectItem value="elliptic">Elliptic (Positive Curvature)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Scene>
+                <NonEuclideanGeometry type={nonEuclideanType} />
+              </Scene>
+            </CardContent>
+            <CardFooter>
+              <div className="text-sm text-muted-foreground">
+                {nonEuclideanType === 'hyperbolic' && 
+                  'In hyperbolic geometry, parallel lines diverge and the sum of angles in a triangle is less than 180°.'}
+                {nonEuclideanType === 'elliptic' && 
+                  'In elliptic geometry, there are no parallel lines and the sum of angles in a triangle exceeds 180°.'}
               </div>
             </CardFooter>
           </Card>
